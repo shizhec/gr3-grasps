@@ -1,0 +1,40 @@
+# Environments and build/test caches
+.venv*/
+venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Downloaded models, generated assets, experiments and recordings
+third_party/
+assets/generated/
+outputs/
+*.py[cod]
+*.log
+MUJOCO_LOG.TXT
+
+# Credentials and measurements belong to the local machine.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+configs/*_site.yaml
+configs/*_site.yml
+configs/*_site.json
+configs/*.local.*
+configs/local/
+calibration/
+local/
+
+# Editors and OS files
+.idea/
+.vscode/
+.DS_Store
+*~

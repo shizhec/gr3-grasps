@@ -1,0 +1,12 @@
+# CAD-derived development seeds, not learned grasps or expert annotations.
+# Order: thumb yaw, thumb pitch, index, middle, ring, pinky (radians).
+templates:
+  tripod:
+    active_q: [-1.4, 0.75, -0.8, -0.8, -0.4, -0.4]
+    fingers: [thumb, index, middle]
+  wrap_medium:
+    active_q: [-1.4, 0.6, -0.55, -0.55, -0.55, -0.55]
+    fingers: [thumb, index, middle, ring, pinky]
+  wrap_wide:
+    active_q: [-1.4, 0.3, -0.25, -0.25, -0.25, -0.25]
+    fingers: [thumb, index, middle, ring, pinky]

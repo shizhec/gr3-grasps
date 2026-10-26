@@ -1,0 +1,3 @@
+-r robot.txt
+# Optional direct camera access; the current adapter targets DepthAI 2.x.
+depthai>=2.30,<3

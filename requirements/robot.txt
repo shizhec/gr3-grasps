@@ -1,0 +1,7 @@
+# Lightweight robot-side dependencies. Install the project with --no-deps.
+# Aurora and FourierDDS are supplied by the robot vendor, not PyPI guesses.
+numpy>=1.26,<3
+scipy>=1.11,<2
+PyYAML>=6,<7
+msgpack>=1,<2
+pyzmq>=26,<28

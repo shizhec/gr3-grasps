@@ -1,0 +1,28 @@
+# Scene benchmark for Dexonomy v3 on GR3 (fixed before running).
+# Six objects x three yaws; one physical execution per scene.
+# Hammer, screwdriver, tape roll and mouse are dropped (no v3 arm success at yaw 0).
+objects: [coffee_mug, candy_box, android_toy, medicine_bottle, ramekin, crayon_box]
+yaws_deg: [0, 45, 90]
+arm_config: configs/dexonomy_gr3_mug.yaml
+# Candidates come only from synthesis with the arm prior at the scene yaw,
+# filtered by the yaw-independent floating-hand lift audit (closed hand).
+pools:
+  "0":
+    - {synthesis: outputs/dexonomy_fdh6_v3_retreat, audit: outputs/dexonomy_v3_retreat_audit}
+    - {synthesis: outputs/dexonomy_fdh6_v3_retreat_other8, audit: outputs/dexonomy_v3_retreat_other8_audit}
+  "45":
+    - {synthesis: outputs/dexonomy_fdh6_v3_yaw45, audit: outputs/dexonomy_v3_yaw45_audit}
+  "90":
+    - {synthesis: outputs/dexonomy_fdh6_v3_yaw90, audit: outputs/dexonomy_v3_yaw90_audit}
+audit_summary: lift_summary_mj3.16.0_discrete_wrist4000us_noslip0_dt500us.json
+# Order: ascending max(reach_distance, lift_reach_distance) from the arm prior,
+# then candidate path. No GR3 execution outcome is used for selection.
+max_plan_attempts: 10
+timeout_s: 900
+# --registration camera: head RGB-D scan + known-mesh planar fit replaces the
+# simulator pose. Candidates are pooled from all synthesized yaws and re-checked
+# against the arm prior at the estimated pose; the true yaw is never used.
+camera:
+  arm_prior: configs/dexonomy_arm_prior.yaml
+  depth_noise_std_m: 0.002
+  depth_dropout: 0.02

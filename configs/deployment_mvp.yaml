@@ -1,0 +1,62 @@
+# Robot and inference host use the same model/policy, with independent local execution checks.
+network:
+  timeout_s: 300
+inference:
+  object_id: coffee_mug
+  arm_config: configs/dexonomy_gr3_mug.yaml
+  candidates:
+    - outputs/dexonomy_fdh6_v3_retreat/run/grasp_data/wrap_wide/coffee_mug/2_4_grasp.npy
+    - outputs/dexonomy_fdh6_v3_retreat/run/grasp_data/wrap_wide/coffee_mug/3_53_grasp.npy
+  max_pose_residual_m: 0.008
+  # Set only after measuring actual OAK known-object pose errors on site.
+  real_rgb_pose_validated: false
+  perception:
+    workspace_min: [0.40, -0.36, 1.009]
+    workspace_max: [0.87, 0.36, 1.18]
+    min_pixels: 35
+camera:
+  calibration_file: configs/deployment_oak.example.json
+scene:
+  calibration_verified: false
+  # Simulation reference only; replace with measured values in your chosen world frame.
+  T_world_base: [[1,0,0,0], [0,1,0,0], [0,0,1,0.93], [0,0,0,1]]
+  table_top_m: 1.0
+  table_center_xy: [0.62, 0.0]
+  table_half_size_xy: [0.29, 0.40]
+execution:
+  command_hz: 100
+  lower_rad: [-2.9671, -1.9199, -1.8326, -2.2689, -1.8326, -0.87266, -1.2217, -1.676, 0.0, -1.602, -1.603, -1.602, -1.602]
+  upper_rad: [2.9671, 0.2618, 1.8326, 0.087266, 1.8326, 1.309, 1.0472, 0.0, 1.159, 0.0, 0.0, 0.0, 0.0]
+  max_speed_rad_s: [0.35,0.35,0.35,0.35,0.35,0.35,0.35,0.25,0.25,0.25,0.25,0.25,0.25]
+  continuity_tolerance_rad: 0.0001
+  start_tolerance_rad: 0.005
+  tracking_tolerance_rad: 0.15
+  context_tolerance_rad: 0.01
+  max_tick_lateness_s: 0.10
+  max_duration_s: 120
+  max_observation_age_s: 60
+  task_ledger_dir: ~/.local/state/gr3_grasping/executions
+aurora:
+  motion_enabled: false
+  mapping_verified: false
+  required_fsm_state: null
+  domain_id: 123
+  robot_name: gr3
+  groups:
+    right_manipulator: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint, right_wrist_yaw_joint, right_wrist_pitch_joint, right_wrist_roll_joint]
+    left_manipulator: [left_shoulder_pitch_joint, left_shoulder_roll_joint, left_shoulder_yaw_joint, left_elbow_pitch_joint, left_wrist_yaw_joint, left_wrist_pitch_joint, left_wrist_roll_joint]
+    head: [head_yaw_joint, head_pitch_joint]
+    waist: [waist_yaw_joint, waist_roll_joint, waist_pitch_joint]
+  # Optional module:function returning a hand adapter; robot-local config only.
+  hand_factory: null
+  hand:
+    mapping_verified: false
+    domain_id: 123
+    group: right_end_effector
+    state_offset: 6
+    sdk_joint_order: [R_thumb_proximal_yaw_joint, R_thumb_proximal_pitch_joint, R_index_proximal_joint, R_middle_proximal_joint, R_ring_proximal_joint, R_pinky_proximal_joint]
+    # SDK position = scale * URDF radians + offset. No unmeasured default mapping.
+    scale: [null, null, null, null, null, null]
+    offset: [null, null, null, null, null, null]
+    sdk_lower: [0,0,0,0,0,0]
+    sdk_upper: [1,1,1,1,1,1]

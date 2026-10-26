@@ -1,0 +1,6 @@
+{
+  "calibrated": false,
+  "description": "Template only. Replace with measured OAK optical-frame-to-world transform and head reference. Never mark this identity example calibrated.",
+  "T_world_camera": [[1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,0,1]],
+  "head_reference_rad": [0.0, 0.14]
+}

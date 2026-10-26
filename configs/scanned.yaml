@@ -1,0 +1,94 @@
+# GSO scans at original metric scale. Masses and hand contact offset are simulation assumptions.
+robot:
+  urdf: third_party/Wiki-GRx-Models/GRX/GR3/gr3v2_1_1/basic_urdf/gr3v2_1_1.urdf
+  base_height_m: 0.93
+  hand: fdh6
+  initial_joints:
+    head_pitch_joint: 0.14
+    right_elbow_pitch_joint: -1.7
+    left_elbow_pitch_joint: -1.7
+    R_thumb_proximal_yaw_joint: -1.4
+    L_thumb_proximal_yaw_joint: -1.4
+  tcp_offset_m:
+  - 0.015
+  - 0.095
+  - -0.125
+  tcp_rotation_rpy:
+  - 3.141592653589793
+  - 0
+  - 1.5707963267948966
+camera:
+  body: camera_link
+  width: 640
+  height: 480
+  fovy_deg: 75
+  depth_noise_std_m: 0.0
+  depth_dropout: 0.0
+  seed: 7
+scene:
+  timestep_s: 0.001
+  table_top_m: 1.0
+  table_center_xy:
+  - 0.62
+  - 0.0
+  table_half_size_xy:
+  - 0.29
+  - 0.4
+  objects:
+  - name: scanned_bottle
+    type: mjcf
+    mjcf: third_party/mujoco_scanned_objects/models/5_HTP/model.xml
+    placement_xy:
+    - 0.46
+    - -0.2
+    mass: 0.08
+  - name: scanned_candy
+    type: mjcf
+    mjcf: third_party/mujoco_scanned_objects/models/Nips_Hard_Candy_Rich_Creamy_Butter_Rum_4_oz_1133_g/model.xml
+    placement_xy:
+    - 0.65
+    - 0.18
+    mass: 0.13
+perception:
+  workspace_min:
+  - 0.4
+  - -0.36
+  - 1.009
+  workspace_max:
+  - 0.87
+  - 0.36
+  - 1.18
+  min_pixels: 35
+planning:
+  pregrasp_distance_m: 0.08
+  max_joint_speed_rad_s: 0.35
+  max_joint_step_rad: 0.02
+  position_tolerance_m: 0.003
+  rotation_tolerance_rad: 0.04
+  collision_penetration_m: 0.001
+  finger_self_penetration_m: 0.003
+hand:
+  kp: 2.0
+  kv: 0.08
+  force_limit_nm: 0.25
+  friction: 1.0
+  close_duration_s: 4.0
+  lift_distance_m: 0.16
+  hold_duration_s: 2.0
+  success_lift_m: 0.1
+  max_contact_penetration_m: 0.003
+graspgen:
+  host: 127.0.0.1
+  port: 5556
+  timeout_ms: 30000
+  num_grasps: 80
+  topk_num_grasps: 24
+m2t2:
+  cpu_threads: 4
+  seed: 7
+  topk: 24
+  target_contact_radius_m: 0.005
+  fdh6_contact_offset_m:
+  - -0.012
+  - 0
+  - -0.045

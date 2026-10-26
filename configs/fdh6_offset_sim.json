@@ -1,0 +1,76 @@
+{
+  "schema": "gr3_fdh6_wrist_offset_v1",
+  "side": "right",
+  "contact_offset_tcp_m": [
+    -0.022,
+    0.0,
+    -0.049999999999999996
+  ],
+  "baseline_contact_offset_tcp_m": [
+    -0.012,
+    0.0,
+    -0.045
+  ],
+  "correction_tcp_m": [
+    -0.009999999999999998,
+    0.0,
+    -0.0049999999999999975
+  ],
+  "selected_profile_index": 11,
+  "calibration_trials": [
+    "android_toy_yaw000",
+    "candy_box_yaw000",
+    "coffee_mug_yaw000",
+    "crayon_box_yaw000",
+    "gaming_mouse_yaw000",
+    "hammer_yaw000",
+    "medicine_bottle_yaw000",
+    "ramekin_yaw000",
+    "screwdriver_yaw000",
+    "tape_roll_yaw000"
+  ],
+  "heldout_trials": [
+    "android_toy_yaw045",
+    "android_toy_yaw090",
+    "candy_box_yaw045",
+    "candy_box_yaw090",
+    "coffee_mug_yaw045",
+    "coffee_mug_yaw090",
+    "crayon_box_yaw045",
+    "crayon_box_yaw090",
+    "gaming_mouse_yaw045",
+    "gaming_mouse_yaw090",
+    "hammer_yaw045",
+    "hammer_yaw090",
+    "medicine_bottle_yaw045",
+    "medicine_bottle_yaw090",
+    "ramekin_yaw045",
+    "ramekin_yaw090",
+    "screwdriver_yaw045",
+    "screwdriver_yaw090",
+    "tape_roll_yaw045",
+    "tape_roll_yaw090"
+  ],
+  "simulation_only": true,
+  "hardware_calibrated": false,
+  "definition": "p_world_tcp = p_world_source_contact - R_world_tcp @ contact_offset_tcp_m",
+  "tcp_reference": {
+    "hand": "fdh6",
+    "tcp_offset_m": [
+      0.015,
+      0.095,
+      -0.125
+    ],
+    "tcp_rotation_rpy": [
+      3.141592653589793,
+      0,
+      1.5707963267948966
+    ]
+  },
+  "validation": {
+    "calibration_scipy": "2/10",
+    "heldout_scipy": "3/20",
+    "heldout_curobo": "4/20",
+    "unseen_objects": false
+  }
+}

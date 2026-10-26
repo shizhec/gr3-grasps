@@ -1,0 +1,19 @@
+# Hard GR3 right-arm prior for offline Dexonomy synthesis (protocol v3).
+# World frame of configs/sim.yaml; placement matches configs/benchmark10.yaml.
+side: right
+# right_shoulder_pitch_joint anchor at the initial pose; tests check it against the model.
+shoulder_world_m: [-0.0177, -0.1182, 1.3204]
+object_xy_world_m: [0.46, -0.20]
+object_yaw_deg: 0
+table_top_world_m: 1.0
+# Thumb axis z component: rejects thumb-down (pronated past palm-down) wraps.
+min_thumb_up: 0.0
+# Sampled hand-base poses: python scripts/build_reachability_map.py
+#   --output outputs/gr3_reachability/right_hand_base.npz --samples 32000000
+# A hand-written "palm along the reach" cone (min_approach_alignment: 0.34,
+# min_finger_forward: -0.5) was tried first: 0/24 synthesized candidates passed
+# GR3 endpoint IK, so the cone is no longer used. See docs/Dexonomy_FDH6接入.md.
+reachability_map: outputs/gr3_reachability/right_hand_base.npz
+reach_position_tol_m: 0.03
+reach_rotation_tol_rad: 0.26
+lift_check_m: 0.16

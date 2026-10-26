@@ -1,0 +1,61 @@
+{
+  "Wiki-GRx-Models": {
+    "url": "https://github.com/FFTAI/Wiki-GRx-Models.git",
+    "commit": "7d96c758f048fe1bf92b3258864d94771ae0c093",
+    "sparse": [
+      "GRX/GR3",
+      "Dexterous_hand/fourier_hand_6dof",
+      "scripts"
+    ],
+    "license": "GPL-3.0"
+  },
+  "fourier_aurora_sdk": {
+    "url": "https://github.com/FFTAI/fourier_aurora_sdk.git",
+    "commit": "b434869719ae256d02d8285e88ea2b22c1515602",
+    "sparse": [
+      "sim",
+      "config",
+      "python/example/gr3",
+      "python/docs"
+    ],
+    "license": "Apache-2.0"
+  },
+  "GraspGen": {
+    "url": "https://github.com/NVlabs/GraspGen.git",
+    "commit": "2dd8852e1be60f5f9d277fafcc621835cdf59110",
+    "sparse": [
+      "client-server",
+      "grasp_gen/serving",
+      "config/grippers",
+      "docs",
+      "docker"
+    ],
+    "license": "NVIDIA license; see upstream LICENSE and LICENSE_ASSETS.md"
+  },
+  "mujoco_scanned_objects": {
+    "url": "https://github.com/kevinzakka/mujoco_scanned_objects.git",
+    "commit": "6ff8d275cebfd5b47e49685e3cfbe64b20e49a3c",
+    "sparse": [
+      "models/Nips_Hard_Candy_Rich_Creamy_Butter_Rum_4_oz_1133_g",
+      "models/5_HTP",
+      "models/ACE_Coffee_Mug_Kristen_16_oz_cup",
+      "models/Crayola_Crayons_24_count",
+      "models/Cole_Hardware_Hammer_Black",
+      "models/Craftsman_Grip_Screwdriver_Phillips_Cushion",
+      "models/3M_Vinyl_Tape_Green_1_x_36_yd",
+      "models/Android_Figure_Orange",
+      "models/Razer_Abyssus_Ambidextrous_Gaming_Mouse",
+      "models/BIA_Porcelain_Ramekin_With_Glazed_Rim_35_45_oz_cup"
+    ],
+    "license": "CC-BY-4.0 mesh/textures; MIT MJCF"
+  },
+  "M2T2": {
+    "url": "https://github.com/NVlabs/M2T2.git",
+    "commit": "be2e5f6feae2f961615ab0f7b643f0f98b0c3a50",
+    "sparse": [
+      "m2t2",
+      "pointnet2_ops"
+    ],
+    "license": "NVIDIA Source Code License; see upstream LICENSE"
+  }
+}

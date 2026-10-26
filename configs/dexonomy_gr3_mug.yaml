@@ -1,0 +1,19 @@
+# Development demonstration: known mesh/pose, fixed base, compensated robot.
+base_config: configs/scanned_candy.yaml
+candidate: outputs/dexonomy_fdh6_v2/run/grasp_data/wrap_wide/coffee_mug/0_3_grasp.npy
+hand_metadata: outputs/dexonomy_fdh6_v2/assets/hand/fdh6/hand_meta.json
+object_id: coffee_mug
+object_folder: ACE_Coffee_Mug_Kristen_16_oz_cup
+mass_kg: 0.30
+placement_xy: [0.46, -0.20]
+timestep_s: 0.0005
+max_hand_joint_speed_rad_s: 0.25
+preform_duration_s: 2.0
+approach_duration_s: 2.0
+grasp_duration_s: 2.0
+squeeze_duration_s: 2.0
+lift_duration_s: 3.0
+hold_duration_s: 2.0
+lift_distance_m: 0.16
+success_lift_m: 0.10
+contact_profile: dexonomy_eval

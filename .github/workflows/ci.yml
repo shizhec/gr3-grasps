@@ -1,0 +1,42 @@
+name: CPU checks
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.11']
+    env:
+      MUJOCO_GL: egl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e '.[dev]'
+      - run: python -m pytest -q
+      - run: gr3-deploy probe
+      - run: python scripts/smoke_deployment.py --output outputs/ci_transport
+  robot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements/robot.txt
+      - run: python -m pip install --no-deps -e .
+      - run: gr3-deploy probe
+      - run: python scripts/smoke_deployment.py --output outputs/ci_robot_transport
+      - name: Confirm robot environment stays lightweight
+        run: |
+          python - <<'PY'
+          import importlib.util
+          for name in ('torch', 'mujoco', 'curobo'):
+              assert importlib.util.find_spec(name) is None, name
+          PY

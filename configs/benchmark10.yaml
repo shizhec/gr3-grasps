@@ -1,0 +1,51 @@
+# Fixed before running: 10 real scans, three yaw angles, one physical attempt.
+base_config: configs/scanned_candy.yaml
+yaws_deg: [0, 45, 90]
+placement_xy: [0.46, -0.20]
+seed: 7
+arm: right
+evaluation_height_reference: center_of_mass
+workspace_min: [0.40, -0.36, 1.009]
+workspace_max: [0.87, 0.36, 1.18]
+timeout_s: 180
+objects:
+  - id: candy_box
+    label: 糖果盒
+    folder: Nips_Hard_Candy_Rich_Creamy_Butter_Rum_4_oz_1133_g
+    mass_kg: 0.13
+  - id: medicine_bottle
+    label: 药瓶
+    folder: 5_HTP
+    mass_kg: 0.08
+  - id: coffee_mug
+    label: 杯子
+    folder: ACE_Coffee_Mug_Kristen_16_oz_cup
+    mass_kg: 0.30
+  - id: crayon_box
+    label: 蜡笔盒
+    folder: Crayola_Crayons_24_count
+    mass_kg: 0.10
+  - id: hammer
+    label: 锤子
+    folder: Cole_Hardware_Hammer_Black
+    mass_kg: 0.25
+  - id: screwdriver
+    label: 螺丝刀
+    folder: Craftsman_Grip_Screwdriver_Phillips_Cushion
+    mass_kg: 0.12
+  - id: tape_roll
+    label: 胶带
+    folder: 3M_Vinyl_Tape_Green_1_x_36_yd
+    mass_kg: 0.08
+  - id: android_toy
+    label: 安卓玩偶
+    folder: Android_Figure_Orange
+    mass_kg: 0.06
+  - id: gaming_mouse
+    label: 鼠标
+    folder: Razer_Abyssus_Ambidextrous_Gaming_Mouse
+    mass_kg: 0.10
+  - id: ramekin
+    label: 小瓷碗
+    folder: BIA_Porcelain_Ramekin_With_Glazed_Rim_35_45_oz_cup
+    mass_kg: 0.15
