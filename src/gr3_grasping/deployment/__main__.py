@@ -10,7 +10,8 @@ import uuid
 import numpy as np
 import yaml
 
-from .protocol import VERSION, digest, load, save, validate_observation, validate_plan, write_json
+from .protocol import (COMMAND_NAMES, LIVE_SOURCES, VERSION, digest, load, save, validate_observation,
+    validate_plan, write_json)
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -72,6 +73,47 @@ def record(config, output):
         robot.close()
 
 
+def record_ros(config, output):
+    """Head camera + joint state + TF over ROS 2; subscriptions only, no motion commands."""
+    from .ros_adapter import RosRobot
+    from .ros_camera import RosCamera, transform_change
+    ros, camera_config, scene = config["ros"], config["ros_camera"], config["scene"]
+    names = COMMAND_NAMES + list(ros["observation_extra_joints"])
+    robot = RosRobot(ros)
+    camera = None
+    try:
+        camera = RosCamera(camera_config)
+        before, T_before = robot.read_state(), camera.base_camera()
+        frame, capture = camera.capture(scene["T_world_base"])
+        state, T_after = robot.read_state(), camera.base_camera()
+        if any(abs(state[n]-before[n]) > .01 for n in names):
+            raise RuntimeError("Robot moved during RGB-D capture; reacquire synchronized observation")
+        moved_m, moved_rad = transform_change(T_before, T_after)
+        if moved_m > camera_config["max_tf_change_m"] or moved_rad > camera_config["max_tf_change_rad"]:
+            raise RuntimeError("Camera pose (TF) changed during capture; reacquire")
+        observation = dict(version=VERSION, observation_id=uuid.uuid4().hex,
+            object_id=config["inference"]["object_id"], source="ros_live", frames=[asdict(frame)],
+            joint_positions_rad={n: state[n] for n in names}, T_world_base=scene["T_world_base"],
+            table_top_m=scene["table_top_m"], table_center_xy=scene["table_center_xy"],
+            table_half_size_xy=scene["table_half_size_xy"],
+            calibration_verified=bool(scene["calibration_verified"] and camera_config["extrinsics_verified"]),
+            state_mapping_verified=bool(ros["mapping_verified"]), recorded_unix_s=time.time(),
+            capture=dict(capture, tf_change_m=moved_m, tf_change_rad=moved_rad))
+        validate_observation(observation)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        save(output, observation)
+        print(json.dumps(dict(output=str(output), observation_id=observation["observation_id"],
+            calibration_verified=observation["calibration_verified"],
+            state_mapping_verified=observation["state_mapping_verified"], **observation["capture"],
+            head_rad=[state["head_yaw_joint"], state["head_pitch_joint"]]),
+            indent=2, default=lambda v: np.round(v, 5).tolist()))
+        print("Saved ROS head-camera/state observation; no motion commands sent")
+    finally:
+        if camera:
+            camera.close()
+        robot.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=ROOT/"configs/deployment_mvp.yaml")
@@ -84,7 +126,7 @@ def main():
     client.add_argument("--endpoint", default="tcp://127.0.0.1:5557")
     client.add_argument("--observation", type=Path, required=True)
     client.add_argument("--output", type=Path, required=True)
-    client.add_argument("--robot", choices=["mock","aurora"], default="mock")
+    client.add_argument("--robot", choices=["mock","aurora","ros"], default="mock")
     client.add_argument("--execute", action="store_true")
     client.add_argument("--time-scale", type=float, default=1.)
     client.add_argument("--stop-file", type=Path)
@@ -92,8 +134,9 @@ def main():
     sample_parser.add_argument("--source", type=Path, required=True)
     sample_parser.add_argument("--output", type=Path, required=True)
     sample_parser.add_argument("--object-id", default="coffee_mug")
-    capture = sub.add_parser("record", help="OAK + Aurora read-only capture, with fixed head")
+    capture = sub.add_parser("record", help="Read-only RGB-D + joint state capture (ROS head camera or OAK + Aurora)")
     capture.add_argument("--output", type=Path, required=True)
+    capture.add_argument("--source", choices=["ros", "oak"], default="ros")
     sub.add_parser("probe", help="Installed versions only; no SDK connection or motor access")
     args = parser.parse_args()
     config = yaml.safe_load(args.config.read_text())
@@ -105,7 +148,7 @@ def main():
         sample(args.source, args.output, args.object_id)
         return
     if args.command == "record":
-        record(config, args.output)
+        (record_ros if args.source == "ros" else record)(config, args.output)
         return
     token = os.environ.get("GR3_DEPLOY_TOKEN", "")
     if len(token) < 16:
@@ -118,9 +161,9 @@ def main():
         return
     obs = load(args.observation)
     validate_observation(obs)
-    if args.robot == "aurora":
-        if obs.get("source") != "oak_live" or time.time()-obs.get("recorded_unix_s",0) > config["execution"]["max_observation_age_s"]:
-            raise ValueError("Hardware requires a fresh OAK/state observation")
+    if args.robot != "mock":
+        if obs.get("source") not in LIVE_SOURCES or time.time()-obs.get("recorded_unix_s",0) > config["execution"]["max_observation_age_s"]:
+            raise ValueError("Hardware requires a fresh live camera/state observation")
     args.output.mkdir(parents=True, exist_ok=False)
     rpc = Client(args.endpoint, token, config["network"]["timeout_s"])
     result = rpc.call("plan", observation=obs)
@@ -133,22 +176,29 @@ def main():
     if not args.execute:
         print(f"Plan saved to {args.output}; no robot adapter opened, no commands sent")
         return
-    from .adapters import AuroraRobot, MockRobot
+    from .adapters import MockRobot
     from .executor import execute
     robot = None
     try:
         # Check before SDK construction, not merely before the first command.
-        if args.robot == "aurora":
-            if not plan["hardware_eligible"] or not config["aurora"]["motion_enabled"]:
+        if args.robot != "mock":
+            if not plan["hardware_eligible"] or not config[args.robot]["motion_enabled"]:
                 raise RuntimeError("Live execution disabled: verify calibration, RGB pose, SDK/hand mappings and local controller first")
             if time.time()-obs["recorded_unix_s"] > config["execution"]["max_observation_age_s"]:
                 raise RuntimeError("Observation aged out during inference; reacquire and replan")
-        robot = MockRobot(obs["joint_positions_rad"]) if args.robot == "mock" else AuroraRobot(config["aurora"])
+        if args.robot == "mock":
+            robot = MockRobot(obs["joint_positions_rad"])
+        elif args.robot == "ros":
+            from .ros_adapter import RosRobot
+            robot = RosRobot(config["ros"])
+        else:
+            from .adapters import AuroraRobot
+            robot = AuroraRobot(config["aurora"])
         report = execute(plan, robot, config["execution"], args.output, obs["observation_id"],
                          args.execute, args.stop_file, args.time_scale)
     except Exception as error:
         report = dict(observation_id=obs["observation_id"], task_id=plan["task_id"], trajectory_completed=False,
-            grasp_success=None, hardware=args.robot=="aurora", error=f"{type(error).__name__}: {error}")
+            grasp_success=None, hardware=args.robot!="mock", error=f"{type(error).__name__}: {error}")
     finally:
         if robot:
             robot.close()

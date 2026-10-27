@@ -15,6 +15,8 @@ ARM_NAMES = [f"right_{n}_joint" for n in (
 HAND_NAMES = ["R_thumb_proximal_yaw_joint", "R_thumb_proximal_pitch_joint"] + [
     f"R_{n}_proximal_joint" for n in ("index", "middle", "ring", "pinky")]
 COMMAND_NAMES = ARM_NAMES + HAND_NAMES
+# Observations captured from the robot's own camera and state, eligible for hardware plans.
+LIVE_SOURCES = ("oak_live", "ros_live")
 
 
 def identifier(value):

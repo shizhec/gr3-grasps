@@ -47,6 +47,18 @@ def execute(plan, robot, policy, directory, observation_id, execute_motion=False
                 raise RuntimeError("Measured joints outside local bounds")
             return q
 
+        # Adapters with slow or approximate feedback (e.g. a 1 Hz gripper) track a subset tick by tick.
+        tracked = [COMMAND_NAMES.index(n) for n in getattr(robot, "tracked_names", COMMAND_NAMES)]
+
+        def check(command, phase, record=True):
+            if stop_file and Path(stop_file).exists():
+                raise RuntimeError("Local stop file requested")
+            actual = measured()
+            if np.max(abs(actual-command)[tracked]) > policy["tracking_tolerance_rad"]:
+                raise RuntimeError("Joint tracking exceeds local tolerance")
+            if record:
+                event("sample", stage=phase, command_rad=command, actual_rad=actual)
+
         initial = np.asarray(plan["stages"][0]["positions_rad"])[0]
         if np.max(abs(measured()-initial)) > policy["start_tolerance_rad"]:
             event("rejected", reason="Measured start state differs from plan")
@@ -60,6 +72,11 @@ def execute(plan, robot, policy, directory, observation_id, execute_motion=False
             for stage in plan["stages"]:
                 phase = stage["name"]
                 event("stage_started", stage=phase)
+                if hasattr(robot, "execute_stage"):
+                    # The adapter owns stage timing (e.g. trajectory goals) and calls back between steps.
+                    robot.execute_stage(stage, lambda command: check(np.asarray(command, float), phase))
+                    event("stage_completed", stage=phase)
+                    continue
                 t = np.asarray(stage["times_s"])
                 q = np.asarray(stage["positions_rad"])
                 start = time.monotonic()
@@ -77,11 +94,7 @@ def execute(plan, robot, policy, directory, observation_id, execute_motion=False
                     elapsed = min(step*period/time_scale, t[-1])
                     command = np.array([np.interp(elapsed, t, q[:, j]) for j in range(13)])
                     robot.send(command)
-                    actual = measured()
-                    if np.max(abs(actual-command)) > policy["tracking_tolerance_rad"]:
-                        raise RuntimeError("Joint tracking exceeds local tolerance")
-                    if step % max(1, round(policy["command_hz"]/10)) == 0 or step == steps:
-                        event("sample", stage=phase, command_rad=command, actual_rad=actual)
+                    check(command, phase, step % max(1, round(policy["command_hz"]/10)) == 0 or step == steps)
                 event("stage_completed", stage=phase)
             event("completed", grasp_success=None)
             return dict(observation_id=observation_id, task_id=plan["task_id"], trajectory_completed=True,

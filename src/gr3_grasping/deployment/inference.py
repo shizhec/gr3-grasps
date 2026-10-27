@@ -8,7 +8,7 @@ import uuid
 import numpy as np
 import yaml
 
-from .protocol import (VERSION, ARM_NAMES, HAND_NAMES, COMMAND_NAMES, digest,
+from .protocol import (VERSION, ARM_NAMES, HAND_NAMES, COMMAND_NAMES, LIVE_SOURCES, digest,
                        validate_observation, validate_plan, save, write_json)
 
 
@@ -144,7 +144,7 @@ class DexonomyInference:
                 stages.append(dict(name="hold", times_s=np.array([0.,settings["hold_duration_s"]]),
                                    positions_rad=np.stack([previous,previous])))
                 eligible = bool(obs.get("calibration_verified") and obs.get("state_mapping_verified")
-                    and obs.get("source") == "oak_live" and self.config["inference"]["real_rgb_pose_validated"])
+                    and obs.get("source") in LIVE_SOURCES and self.config["inference"]["real_rgb_pose_validated"])
                 result = dict(version=VERSION, task_id=uuid.uuid4().hex, observation_id=obs["observation_id"],
                     observation_digest=digest(obs), joint_names=COMMAND_NAMES, stages=stages,
                     context_joint_positions_rad={n:v for n,v in obs["joint_positions_rad"].items()

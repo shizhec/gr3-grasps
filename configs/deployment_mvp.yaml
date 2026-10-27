@@ -48,6 +48,7 @@ aurora:
     head: [head_yaw_joint, head_pitch_joint]
     waist: [waist_yaw_joint, waist_roll_joint, waist_pitch_joint]
   # Optional module:function returning a hand adapter; robot-local config only.
+  # (ros section below is the alternative: the fourier_control ROS 2 bridge on the robot host)
   hand_factory: null
   hand:
     mapping_verified: false
@@ -60,3 +61,57 @@ aurora:
     offset: [null, null, null, null, null, null]
     sdk_lower: [0,0,0,0,0,0]
     sdk_upper: [1,1,1,1,1,1]
+# fourier_control ROS 2 bridge (robot_control + hand_control). ROS_DOMAIN_ID, RMW and CYCLONEDDS_URI
+# come from the environment. The adapter never publishes /enable_modules.
+ros:
+  motion_enabled: false
+  mapping_verified: false
+  joint_states_topic: /joint_states
+  module_states_topic: /module_states
+  required_modules: [right_arm_trajectory]
+  arm_action: /right_arm_controller/follow_joint_trajectory
+  hand_action: /right_hand_controller/gripper_cmd
+  arm_joint_names: [right_shoulder_pitch_joint, right_shoulder_roll_joint, right_shoulder_yaw_joint, right_elbow_pitch_joint, right_wrist_yaw_joint, right_wrist_pitch_joint, right_wrist_roll_joint]
+  # robot_control 'frequency': one trajectory point per tick, time_from_start ignored by the bridge.
+  server_rate_hz: 100
+  # Goals cannot be cancelled; this bounds how long the arm keeps moving after a stop/abort.
+  chunk_s: 0.5
+  check_hz: 20
+  arm_max_age_s: 0.1
+  hand_max_age_s: 2.5
+  module_states_max_age_s: 2.0
+  startup_timeout_s: 4
+  action_timeout_s: 5
+  hand_max_effort: 0.0
+  # open_close: hand open before contact, closed from "grasp" on (approximates Dexonomy shapes).
+  # fit: reject plans whose hand shapes the GripperCommand cannot reproduce within tolerance_rad.
+  hand_mode: open_close
+  hand_open_close:
+    # GripperCommand position in reference-joint radians: 0 open, closed_state (-1.6) fully closed.
+    open_command: 0.0
+    close_command: -1.6
+    open_stages: [preform, pregrasp, approach]
+    close_stages: [grasp, squeeze, lift, hold]
+  # Recorded besides arm/hand; these become the frozen planning context checked during execution.
+  observation_extra_joints: [head_yaw_joint, head_pitch_joint, waist_yaw_joint, waist_roll_joint, waist_pitch_joint]
+  hand_gripper:
+    # hand_control closed_state (fourier_control config_gr3.yaml); command = closed_state[reference] * (1 - p).
+    command_reference_joint: R_index_proximal_joint
+    closed_state: {R_index_proximal_joint: -1.6, R_middle_proximal_joint: -1.6, R_pinky_proximal_joint: -1.6, R_ring_proximal_joint: -1.6, R_thumb_proximal_pitch_joint: 1.15, R_thumb_proximal_yaw_joint: -1.6}
+    tolerance_rad: 0.15
+# Head camera through ROS (realsense2_camera on the Jetson) plus TF from robot_state_publisher.
+ros_camera:
+  color_topic: /camera/head_camera/color/image_raw
+  depth_topic: /camera/head_camera/aligned_depth_to_color/image_raw
+  info_topic: /camera/head_camera/aligned_depth_to_color/camera_info
+  base_frame: base_link
+  camera_frame: head_camera_color_optical_frame
+  depth_scale_m: 0.001  # 16UC1 depth in millimetres
+  sync_tolerance_s: 0.005
+  max_image_age_s: 0.5
+  timeout_s: 5
+  # T_base_camera = TF(base_frame <- camera_frame) @ extrinsic_correction; replace after measuring.
+  extrinsic_correction: [[1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,0,1]]
+  extrinsics_verified: false
+  max_tf_change_m: 0.002
+  max_tf_change_rad: 0.005
