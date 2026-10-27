@@ -98,6 +98,7 @@ def record_ros(config, output):
             table_half_size_xy=scene["table_half_size_xy"],
             calibration_verified=bool(scene["calibration_verified"] and camera_config["extrinsics_verified"]),
             state_mapping_verified=bool(ros["mapping_verified"]), recorded_unix_s=time.time(),
+            perception_workspace={k: config["inference"]["perception"][k] for k in ("workspace_min", "workspace_max")},
             capture=dict(capture, tf_change_m=moved_m, tf_change_rad=moved_rad))
         validate_observation(observation)
         output.parent.mkdir(parents=True, exist_ok=True)

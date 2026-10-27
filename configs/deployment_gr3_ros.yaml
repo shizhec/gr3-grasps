@@ -15,9 +15,11 @@ inference:
   # Set only after measuring actual known-object pose errors with the head camera on site.
   real_rgb_pose_validated: false
   perception:
-    # World frame, boxed around the mug on the white box (other objects start at x ~0.6).
-    workspace_min: [0.46, -0.12, 0.817]
-    workspace_max: [0.63, 0.09, 1.00]
+    # World frame, boxed around the mug on the box stack. Starts 1.6 cm above the stack top so the
+    # box's front face and top edge stay out. record --source ros sends this box with each
+    # observation and the server uses it, so a re-measured scene needs no server restart.
+    workspace_min: [0.39, -0.08, 0.995]
+    workspace_max: [0.53, 0.11, 1.15]
     min_pixels: 35
 camera:
   calibration_file: configs/deployment_oak.example.json
@@ -25,12 +27,12 @@ scene:
   calibration_verified: false
   # Floor plane 0.911 m below base_link, tilt 0.25 deg (IMU gravity agrees): level frame on the floor.
   T_world_base: [[1,0,0,0], [0,1,0,0], [0,0,1,0.911], [0,0,0,1]]
-  # The mug stands on a white box (top 0.807 m, 0.104 m below base_link) on a wooden table
-  # (0.752 m). Collision model: the whole table raised to the box top, which is conservative.
-  # Table visible x 0.448..1.516, y -0.556..0.519; near edge outside the image, assumed x 0.40.
-  table_top_m: 0.807
-  table_center_xy: [0.96, -0.019]
-  table_half_size_xy: [0.56, 0.537]
+  # The mug stands on a box stack on the wooden table (0.752 m). Stack top 0.979 m (0.068 m above
+  # base_link, close to the simulated 0.07 m); front face at x 0.385. Only the stack top is
+  # modelled as the support/collision box here; the wooden table is 0.227 m lower.
+  table_top_m: 0.979
+  table_center_xy: [0.46, -0.005]
+  table_half_size_xy: [0.075, 0.12]
 execution:
   command_hz: 100
   lower_rad: [-2.9671, -1.9199, -1.8326, -2.2689, -1.8326, -0.87266, -1.2217, -1.676, 0.0, -1.602, -1.603, -1.602, -1.602]

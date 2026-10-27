@@ -62,6 +62,8 @@ class DexonomyInference:
             path, cfg, grasp, source, provenance = build_experiment(settings, attempt/"model")
             cfg["scene"]["table_top_m"] = float(obs["table_top_m"])
             cfg["perception"].update(self.config["inference"]["perception"])
+            # The robot side measures the scene, so its workspace box (if sent) overrides the server's.
+            cfg["perception"].update(obs.get("perception_workspace", {}))
             configure_scene(path, obs)
             with Simulation(path, cfg, render=False) as sim:
                 T_base = np.asarray(obs["T_world_base"])

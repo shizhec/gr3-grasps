@@ -217,3 +217,14 @@ def test_ros_image_decoding_and_frame_matching():
 
 def test_live_sources_include_ros_record():
     assert "ros_live" in p.LIVE_SOURCES and "oak_live" in p.LIVE_SOURCES
+
+
+def test_observation_workspace_is_validated(observation):
+    p.validate_observation(observation)  # Optional field.
+    observation["perception_workspace"] = dict(workspace_min=[.39, -.08, .995], workspace_max=[.53, .11, 1.15])
+    p.validate_observation(observation)
+    for bad in (dict(workspace_min=[.5, 0, 1], workspace_max=[.4, 1, 2]), dict(workspace_min=[0, 0], workspace_max=[1, 1]),
+                dict(workspace_min=[0, 0, np.nan], workspace_max=[1, 1, 1]), dict(workspace_min=[0, 0, 0], workspace_max=[1, 1, 1], extra=1)):
+        observation["perception_workspace"] = bad
+        with pytest.raises(ValueError, match="perception workspace"):
+            p.validate_observation(observation)

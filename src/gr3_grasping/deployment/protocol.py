@@ -123,6 +123,12 @@ def validate_observation(obs):
         v = np.asarray(obs[key])
         if v.shape != (2,) or not np.isfinite(v).all() or (key == "table_half_size_xy" and np.any(v <= 0)):
             raise ValueError("Invalid observed table geometry")
+    if "perception_workspace" in obs:
+        box = obs["perception_workspace"]
+        lo, hi = (np.asarray(box.get(k), float) for k in ("workspace_min", "workspace_max"))
+        if set(box) != {"workspace_min", "workspace_max"} or lo.shape != (3,) or hi.shape != (3,) \
+                or not np.isfinite([lo, hi]).all() or np.any(lo >= hi):
+            raise ValueError("Invalid perception workspace")
 
 
 def validate_plan(plan, observation_id, policy):
