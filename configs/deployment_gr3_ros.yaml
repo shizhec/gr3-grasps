@@ -15,10 +15,9 @@ inference:
   # Set only after measuring actual known-object pose errors with the head camera on site.
   real_rgb_pose_validated: false
   perception:
-    # World frame. Starts 3 cm above the crate top (its front rim sits 1-2.5 cm higher than the
-    # measured plane) and stops before the chair back at x ~0.76: 4331 bottle vs 497 other points.
-    workspace_min: [0.40, -0.20, 0.8475]
-    workspace_max: [0.75, 0.22, 1.12]
+    # World frame, boxed around the mug only (other objects on the table start at x ~0.6).
+    workspace_min: [0.40, -0.13, 0.762]
+    workspace_max: [0.58, 0.06, 0.95]
     min_pixels: 35
 camera:
   calibration_file: configs/deployment_oak.example.json
@@ -26,10 +25,11 @@ scene:
   calibration_verified: false
   # Floor plane 0.911 m below base_link, tilt 0.25 deg (IMU gravity agrees): level frame on the floor.
   T_world_base: [[1,0,0,0], [0,1,0,0], [0,0,1,0.911], [0,0,0,1]]
-  # Support surface = top of the plastic crate: 0.0935 m below base_link.
-  table_top_m: 0.8175
-  table_center_xy: [0.612, 0.016]
-  table_half_size_xy: [0.185, 0.174]
+  # Wooden table, 0.159 m below base_link (measured 2026-10-27 16:00). Visible extent x 0.448..1.399,
+  # y -0.540..0.513; the near edge is outside the image, so x starts at an assumed 0.40.
+  table_top_m: 0.752
+  table_center_xy: [0.90, -0.014]
+  table_half_size_xy: [0.50, 0.527]
 execution:
   command_hz: 100
   lower_rad: [-2.9671, -1.9199, -1.8326, -2.2689, -1.8326, -0.87266, -1.2217, -1.676, 0.0, -1.602, -1.603, -1.602, -1.602]
